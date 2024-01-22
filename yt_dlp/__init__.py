@@ -607,6 +607,11 @@ def get_postprocessors(opts):
             'api': opts.sponsorblock_api,
             'when': 'after_filter'
         }
+    if opts.crawldescriptions:
+        yield {
+            'key': 'CrawlDescriptions',
+            'when': 'after_video'
+        }
     if opts.convertsubtitles:
         yield {
             'key': 'FFmpegSubtitlesConvertor',

@@ -18,6 +18,7 @@ from .postprocessor import (
     FFmpegThumbnailsConvertorPP,
     FFmpegVideoRemuxerPP,
     SponsorBlockPP,
+    CrawlDescriptionsPP
 )
 from .postprocessor.modify_chapters import DEFAULT_SPONSORBLOCK_CHAPTER_TITLE
 from .update import UPDATE_SOURCES, detect_variant, is_non_updateable
@@ -1758,6 +1759,10 @@ def create_parser():
             '"after_video" (after downloading and processing all formats of a video), '
             'or "playlist" (at end of playlist). '
             'This option can be used multiple times to add different postprocessors'))
+    postproc.add_option(
+        '--crawl-descriptions',
+        dest='crawldescriptions', action='store_true',
+        help='Also download videos found in descriptions')
 
     sponsorblock = optparse.OptionGroup(parser, 'SponsorBlock Options', description=(
         'Make chapter entries for, or remove various segments (sponsor, introductions, etc.) '

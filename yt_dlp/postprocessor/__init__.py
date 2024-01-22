@@ -33,6 +33,7 @@ from .movefilesafterdownload import MoveFilesAfterDownloadPP
 from .sponskrub import SponSkrubPP
 from .sponsorblock import SponsorBlockPP
 from .xattrpp import XAttrMetadataPP
+from .crawl import CrawlDescriptionsPP
 from ..plugins import load_plugins
 
 _PLUGIN_CLASSES = load_plugins('postprocessor', 'PP')
