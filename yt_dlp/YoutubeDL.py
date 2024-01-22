@@ -3528,7 +3528,8 @@ class YoutubeDL:
 
     def download(self, url_list):
         """Download a given list of URLs."""
-        url_list = variadic(url_list)  # Passing a single URL is a common mistake
+        self._url_list = set(variadic(url_list))  # Passing a single URL is a common mistake
+        self._url_seen = set(self._url_list)
         outtmpl = self.params['outtmpl']['default']
         if (len(url_list) > 1
                 and outtmpl != '-'
@@ -3536,7 +3537,8 @@ class YoutubeDL:
                 and self.params.get('max_downloads') != 1):
             raise SameFileError(outtmpl)
 
-        for url in url_list:
+        while self._url_list:
+            url = self._url_list.pop()
             self.__download_wrapper(self.extract_info)(
                 url, force_generic_extractor=self.params.get('force_generic_extractor', False))
 
