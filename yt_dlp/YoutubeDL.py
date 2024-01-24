@@ -156,7 +156,7 @@ from .utils import (
     write_json_file,
     write_string,
 )
-from .utils._utils import _YDLLogger
+from .utils._utils import _YDLLogger, WaybackFallback
 from .utils.networking import (
     HTTPHeaderDict,
     clean_headers,
@@ -1602,6 +1602,19 @@ class YoutubeDL:
                     self.report_error(msg)
                 except ExtractorError as e:  # An error we somewhat expected
                     self.report_error(str(e), e.format_traceback())
+                    if self.params.get('failedarchive'):
+                        fn = self.params.get('failedarchive')
+                        if fn is None:
+                            return
+                        vid_id = f'{" ".join(e.ie)} {e.video_id}'
+                        assert vid_id
+
+                        self.write_debug(f'Adding to failed archive: {vid_id}')
+                        if is_path_like(fn):
+                            with locked_file(fn, 'a', encoding='utf-8') as archive_file:
+                                archive_file.write(vid_id + '\n')
+                except WaybackFallback:
+                    pass
                 except Exception as e:
                     if self.params.get('ignoreerrors'):
                         self.report_error(str(e), tb=encode_compat_str(traceback.format_exc()))
@@ -3541,7 +3554,7 @@ class YoutubeDL:
             url = self._url_list.pop()
             self.__download_wrapper(self.extract_info)(
                 url, force_generic_extractor=self.params.get('force_generic_extractor', False))
-
+            
         return self._download_retcode
 
     def download_with_info_file(self, info_filename):

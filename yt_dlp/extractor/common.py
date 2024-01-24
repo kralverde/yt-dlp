@@ -37,6 +37,9 @@ from ..networking.exceptions import (
     IncompleteRead,
     network_exceptions,
 )
+
+from ..utils._utils import WaybackFallback
+
 from ..utils import (
     IDENTITY,
     JSON_LD_RE,
@@ -732,6 +735,13 @@ class InfoExtractor:
         except UnsupportedError:
             raise
         except ExtractorError as e:
+            if self.get_param('waybackfallback'):
+                from .archiveorg import YoutubeWebArchiveIE
+                if not isinstance(self, YoutubeWebArchiveIE):
+                    wayback_url = f'https://web.archive.org/web/{url}'
+                    self.to_screen(f'Failed to download {url}. Adding {wayback_url} to the download set.')
+                    self._downloader._url_list.add(wayback_url)
+                    raise WaybackFallback()
             e.video_id = e.video_id or self.get_temp_id(url)
             e.ie = e.ie or self.IE_NAME,
             e.traceback = e.traceback or sys.exc_info()[2]

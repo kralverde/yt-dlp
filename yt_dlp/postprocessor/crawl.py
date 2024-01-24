@@ -2,30 +2,26 @@ import re
 
 from typing import TYPE_CHECKING
 from .ffmpeg import FFmpegPostProcessor
+from ..extractor import list_extractor_classes
 
 if TYPE_CHECKING:
     from ..YoutubeDL import YoutubeDL
 
-class CrawlDescriptionsPP(FFmpegPostProcessor):
-    EXTRACTORS = {
-        'Youtube': 'YouTube',
-    }
+_URL_REGEX = re.compile(r'\b((?:https?://)?(?:(?:www\.)?(?:[\da-z\.-]+)\.(?:[a-z]{2,6})|(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:(?:[0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?::[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(?::[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(?:ffff(?::0{1,4}){0,1}:){0,1}(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])|(?:[0-9a-fA-F]{1,4}:){1,4}:(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])))(?::[0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])?(?:/[\w\.-]*)*/?)\b')
 
+class CrawlDescriptionsPP(FFmpegPostProcessor):
     def __init__(self, downloader: 'YoutubeDL'):
         FFmpegPostProcessor.__init__(self, downloader)
-        from ..extractor.youtube import YoutubeIE
-        self._valid_urls = re.compile(YoutubeIE._VALID_URL.replace(r'^', '').replace(r'$', ''))
         self._downloader = downloader
 
     def run(self, info):
-        extractor = info['extractor_key']
-        if extractor not in self.EXTRACTORS:
-            self.to_screen(f'Crawling is not supported for {extractor}')
-            return [], info
-            
-        urls = set(match[0] for match in self._valid_urls.finditer(info['description']) if match[1] and match[2])
-        seen_urls = self._downloader._url_seen.intersection(urls)
-        new_urls = urls.difference(seen_urls)
+        urls = _URL_REGEX.finditer(info['description'])
+        valid_url_sets = (map(lambda extractor: extractor._match_valid_url(url[0]), 
+                              (_ for _ in list_extractor_classes())) for url in urls)
+        valid_urls = set(url[0] for group in valid_url_sets for url in group if url)
+
+        seen_urls = self._downloader._url_seen.intersection(valid_urls)
+        new_urls = valid_urls.difference(seen_urls)
 
         if seen_urls:
             self.write_debug(f'Not adding {", ".join(seen_urls)} as they have already been seen.')

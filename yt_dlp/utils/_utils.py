@@ -909,6 +909,9 @@ def bug_reports_message(before=';'):
 
     return (before + ' ' if before else '') + msg
 
+class WaybackFallback(Exception):
+    pass
+
 
 class YoutubeDLError(Exception):
     """Base exception for YoutubeDL errors."""

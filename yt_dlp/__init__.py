@@ -534,6 +534,9 @@ def validate_options(opts):
     report_conflict('--sponsorblock-remove', 'sponsorblock_remove', default=set())
     report_conflict('--xattrs', 'xattrs')
 
+    report_conflict('--failed-archive', '--abort-on-error')
+    report_conflict('--failed-archive', '--no-ignore-errors')
+
     # Fully deprecated options
     def report_deprecation(val, old, new=None):
         if not val:
@@ -816,6 +819,7 @@ def parse_options(argv=None):
         'restrictfilenames': opts.restrictfilenames,
         'windowsfilenames': opts.windowsfilenames,
         'ignoreerrors': opts.ignoreerrors,
+        'failedarchive': opts.failedarchive,
         'force_generic_extractor': opts.force_generic_extractor,
         'allowed_extractors': opts.allowed_extractors or ['default'],
         'ratelimit': opts.ratelimit,
@@ -943,6 +947,7 @@ def parse_options(argv=None):
         '_warnings': warnings,
         '_deprecation_warnings': deprecation_warnings,
         'compat_opts': opts.compat_opts,
+        'waybackfallback': opts.waybackfallback
     })
 
 

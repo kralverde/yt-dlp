@@ -353,6 +353,11 @@ def create_parser():
         action='store_false', dest='ignoreerrors',
         help='Abort downloading of further videos if an error occurs (Alias: --no-ignore-errors)')
     general.add_option(
+        '--failed-archive', metavar='FILE',
+        dest='failedarchive',
+        help='Record the IDs of all failed videos in this file')
+    
+    general.add_option(
         '--dump-user-agent',
         action='store_true', dest='dump_user_agent', default=False,
         help='Display the current user-agent and exit')
@@ -1105,6 +1110,10 @@ def create_parser():
         '--sleep-subtitles', metavar='SECONDS',
         dest='sleep_interval_subtitles', default=0, type=int,
         help='Number of seconds to sleep before each subtitle download')
+    workarounds.add_option(
+        '--wayback-fallback', action='store_true', dest='waybackfallback',
+        help='Use the wayback machine if youtube videos are unavaliable'
+    )
 
     verbosity = optparse.OptionGroup(parser, 'Verbosity and Simulation Options')
     verbosity.add_option(
