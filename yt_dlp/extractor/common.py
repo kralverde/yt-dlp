@@ -737,7 +737,7 @@ class InfoExtractor:
         except ExtractorError as e:
             if self.get_param('waybackfallback'):
                 from .archiveorg import YoutubeWebArchiveIE
-                if not isinstance(self, YoutubeWebArchiveIE):
+                if not isinstance(self, YoutubeWebArchiveIE) and not 'archive.org' in url:
                     wayback_url = f'https://web.archive.org/web/{url}'
                     self.to_screen(f'Failed to download {url}. Adding {wayback_url} to the download set.')
                     self._downloader._url_list.append(wayback_url)
