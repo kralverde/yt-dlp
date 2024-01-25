@@ -740,7 +740,7 @@ class InfoExtractor:
                 if not isinstance(self, YoutubeWebArchiveIE):
                     wayback_url = f'https://web.archive.org/web/{url}'
                     self.to_screen(f'Failed to download {url}. Adding {wayback_url} to the download set.')
-                    self._downloader._url_list.add(wayback_url)
+                    self._downloader._url_list.append(wayback_url)
                     raise WaybackFallback()
             e.video_id = e.video_id or self.get_temp_id(url)
             e.ie = e.ie or self.IE_NAME,
