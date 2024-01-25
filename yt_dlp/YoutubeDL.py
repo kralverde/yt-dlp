@@ -1602,11 +1602,14 @@ class YoutubeDL:
                     self.report_error(msg)
                 except ExtractorError as e:  # An error we somewhat expected
                     self.report_error(str(e), e.format_traceback())
-                    if self.params.get('failedarchive'):
+                    if self.params.get('failedarchive') and e.video_id:
                         fn = self.params.get('failedarchive')
                         if fn is None:
                             return
-                        vid_id = f'{" ".join(e.ie)} {e.video_id}'
+                        if e.ie:
+                            vid_id = f'{" ".join(variadic(e.ie))} {e.video_id}'
+                        else:
+                            vid_id = e.video_id
                         assert vid_id
 
                         self.write_debug(f'Adding to failed archive: {vid_id}')
