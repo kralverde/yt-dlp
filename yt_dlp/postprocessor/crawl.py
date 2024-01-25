@@ -13,11 +13,16 @@ class CrawlDescriptionsPP(FFmpegPostProcessor):
     def __init__(self, downloader: 'YoutubeDL'):
         FFmpegPostProcessor.__init__(self, downloader)
         self._downloader = downloader
+        self._extractors = ('YouTube',)
 
     def run(self, info):
+        if 'description' not in info:
+            return [], info
+
         urls = _URL_REGEX.finditer(info['description'])
         valid_url_sets = (map(lambda extractor: extractor._match_valid_url(url[0]), 
-                              (_ for _ in list_extractor_classes())) for url in urls)
+                              (clazz for clazz in list_extractor_classes() if clazz.IE_DESC in self._extractors)) 
+                              for url in urls)
         valid_urls = set(url[0] for group in valid_url_sets for url in group if url)
 
         seen_urls = self._downloader._url_seen.intersection(valid_urls)
@@ -29,6 +34,6 @@ class CrawlDescriptionsPP(FFmpegPostProcessor):
             self.to_screen(f'Adding {", ".join(new_urls)} to be downloaded.')
 
         self._downloader._url_seen.update(new_urls)
-        self._downloader._url_list.update(new_urls)
+        self._downloader._url_list.extend(new_urls)
 
         return [], info

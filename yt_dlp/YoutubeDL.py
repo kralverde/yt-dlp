@@ -3544,7 +3544,7 @@ class YoutubeDL:
 
     def download(self, url_list):
         """Download a given list of URLs."""
-        self._url_list = set(variadic(url_list))  # Passing a single URL is a common mistake
+        self._url_list = list(variadic(url_list))  # Passing a single URL is a common mistake
         self._url_seen = set(self._url_list)
         outtmpl = self.params['outtmpl']['default']
         if (len(url_list) > 1
